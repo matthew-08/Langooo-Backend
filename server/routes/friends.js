@@ -80,6 +80,7 @@ router.get('/latestMessage/:id', async(req, res) => {
 })
 
 router.post('/addConvo/:id1/:id2', async (req, res) => {
+    console.log('testtest')
     console.log(req.params)
     const { id1:userOne, id2:userTwo } = req.params
 
@@ -88,7 +89,7 @@ router.post('/addConvo/:id1/:id2', async (req, res) => {
     WHERE userid1 = $1 AND userid2 = $2
     OR
     userid2 = $1 AND userid1 = $2 
-    `)
+    `, [userOne, userTwo])
     if(checkForExisting.rowCount !== 0) {
         return res.json(404).json({ status: 'conversation already exists'})
     }
@@ -97,6 +98,8 @@ router.post('/addConvo/:id1/:id2', async (req, res) => {
         VALUES($1, $2)
         RETURNING *
     `, [userOne, userTwo])
+
+    console.log('test' + addConvo.rows)
 
     return res.status(200).json(addConvo.rows[0])
 })
