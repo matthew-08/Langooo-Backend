@@ -5,8 +5,6 @@ const bcrypt = require('bcrypt')
 const rateLimiter = require('../controllers/rateLimiter')
 
 router.route('/signIn').get(async (req, res) => {
-    console.log('sign in attempt')
-    console.log(req.session.user)
     if(req.session.user && req.session.user.username) {
         return res.status(200)
         .json({ 
@@ -38,13 +36,14 @@ router.route('/signIn').get(async (req, res) => {
             username: username,
             userId: checkForUser.rows[0].id,
             loggedIn: true,
-            userImg: ''
+            userImg: '',
+            onlineStatus: false
         }
         return res.status(200).json({
             loggedIn: true, 
             username, 
             userId: checkForUser.rows[0].id,
-            userImg: null
+            userImg: null,
         })
     } else {
         res.status(404).json({type: 'password', status: 'Incorrect password'})
@@ -58,9 +57,11 @@ router.post('/register', async  (req, res) => {
         username, 
         email, 
         password, 
-        learningLanguages,
+        languages: learningLanguages,
         nativeLanguage,
     } = req.body
+
+    console.log(req.body);
 
     
     const existingUser = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
@@ -80,13 +81,13 @@ router.post('/register', async  (req, res) => {
         `, [username, hashedPass, nativeLanguage])
         const userId = insertUser.rows[0].id
 
-        for(let i = 0; i <= learningLanguages.length -1; i++) {
+        for(let i = 0; i <= learningLanguages.length-1; i++) {
             await pool.query(`
                 INSERT INTO user_language(language_id, user_id)
                 SELECT language.id, $1
-                FROM language.name
+                FROM language
                 WHERE language.name = $2
-            `, [userId, learningLanguages])
+            `, [userId, learningLanguages[i]])
         }
 
         req.session.user = {
