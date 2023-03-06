@@ -79,6 +79,28 @@ router.get('/latestMessage/:id', async(req, res) => {
     return res.json(mostRecentMessage.rows[0])
 })
 
+router.post('/addConvo/:id1/:id2', async (req, res) => {
+    console.log(req.params)
+    const { id1:userOne, id2:userTwo } = req.params
+
+    const checkForExisting = await pool.query(`
+    SELECT * FROM conversation
+    WHERE userid1 = $1 AND userid2 = $2
+    OR
+    userid2 = $1 AND userid1 = $2 
+    `)
+    if(checkForExisting.rowCount !== 0) {
+        return res.json(404).json({ status: 'conversation already exists'})
+    }
+    const addConvo = await pool.query(`
+        INSERT INTO conversation(userid1, userid2)
+        VALUES($1, $2)
+        RETURNING *
+    `, [userOne, userTwo])
+
+    return res.status(200).json(addConvo.rows[0])
+})
+
 router.post('/newMessage/', async (req, res) => {
     console.log(req.body);
     const {
