@@ -1,6 +1,6 @@
 const router = require('express').Router()
 const pool = require('../db')
-const redisClient = require('../redis')
+const redisClient = require('../redis').redisClient
 
 
 router.post('/sendMessage', async (req, res) => {

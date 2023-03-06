@@ -1,5 +1,6 @@
 const pool = require('../db')
 const router = require('express').Router()
+const userOnline = require('../redis').userOnline
 
 
 router.get('/allUsers/', async (req, res) => {
@@ -39,13 +40,17 @@ router.get('/allUsers/', async (req, res) => {
                 nativeLanguage: languages[queryUsers.native_lang], 
                 userImg: queryUsers.user_img,
                 learningLanguages: [queryUsers.user_language],
-                onlineStatus: false,
+                onlineStatus: null,
                 bio: queryUsers.bio,
             })
         }
         return acc
     }, [])
-    console.log(reduceUsers);
+    for(let i = 0; i <= reduceUsers.length - 1; i++) {
+        const userOnlineStatus = await userOnline(reduceUsers[i].userId)
+
+        reduceUsers[i].onlineStatus = userOnlineStatus
+    }
     return res.status(200).json(reduceUsers)
 })
 

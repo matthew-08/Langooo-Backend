@@ -14,7 +14,7 @@ const app = express()
 
 const server = http.createServer(app)
 
-const redisClient = require('./redis')
+const redisClient = require('./redis').redisClient
 
 const io = new Server(server, {
     cors: {
@@ -35,10 +35,11 @@ app.use(sessionMiddleware)
 io.on('connect', async socket => {
     console.log('in io connect')
     const ok = await redisClient.set(
-        `${socket.request.session.user.id}`, `${socket.id}`, 'EX', 1000,
+        `${socket.request.session.user.userId}`, `${socket.id}`, 'EX', 1000,
     )
     const hello = await redisClient.ttl(`${socket.request.session.user.id}`).then(res => console.log(res))
-
+    
+    const check = await redisClient.exists(`${socket.request.user}`)
     
     socket.on('disconnect', async () => {
         const userId = socket.request.session.user.id

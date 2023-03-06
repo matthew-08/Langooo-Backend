@@ -1,7 +1,9 @@
-const redisClient = require('../redis')
+const redisClient = require('../redis').redisClient
 
 
 module.exports.authorizeUser = (socket, next) => {
+    console.log(socket)
+    console.log('in socket')
      if(!socket.request.session || !socket.request.session.user) {
         console.log('bad req')
         next(new Error('not authorized'))
