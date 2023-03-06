@@ -12,7 +12,7 @@ router.route('/signIn').get(async (req, res) => {
         .json({ 
             loggedIn: true, 
             username: req.session.user.username, 
-            userId: req.session.user.id,
+            userId: req.session.user.userId,
             userImg: '' 
         })
     } else {
@@ -23,7 +23,9 @@ router.route('/signIn').get(async (req, res) => {
     console.log(req.body)
 
 
-    const checkForUser = await pool.query('SELECT * FROM users WHERE username=$1', [username])
+    const checkForUser = await pool.query(`
+        SELECT id, passhash FROM users WHERE username=$1
+       `, [username])
     
     if(checkForUser.rowCount === 0) {
         return res.status(404).json({type: 'username', status: 'No user found'})
@@ -52,7 +54,13 @@ router.route('/signIn').get(async (req, res) => {
 })
 
 router.post('/register', async  (req, res) => {
-    const { username, email, password } = req.body
+    const { 
+        username, 
+        email, 
+        password, 
+        learningLanguages,
+        nativeLanguage,
+    } = req.body
 
     
     const existingUser = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
@@ -60,20 +68,41 @@ router.post('/register', async  (req, res) => {
     if(existingUser.rowCount !== 0) {
         return res.status(404).json({ type: 'username', status: 'username taken' })
     }
+
     else {
         const hashedPass = await bcrypt.hash(password, 10);
-        const insertUser = await pool.query('INSERT INTO users (username, passhash) VALUES($1, $2) RETURNING id', [username, hashedPass])
+        const insertUser = await pool.query(`
+        INSERT INTO users (native_lang, username, passhash) 
+        SELECT language.id, $1, $2
+        FROM language
+        WHERE language.name = $3
+        RETURNING id
+        `, [username, hashedPass, nativeLanguage])
+        const userId = insertUser.rows[0].id
+
+        for(let i = 0; i <= learningLanguages.length -1; i++) {
+            await pool.query(`
+                INSERT INTO user_language(language_id, user_id)
+                SELECT language.id, $1
+                FROM language.name
+                WHERE language.name = $2
+            `, [userId, learningLanguages])
+        }
+
         req.session.user = {
             username: username,
             userId: insertUser.rows[0].id,
             loggedIn: true,
             userImg: '',
+            nativeLanguage: nativeLanguage,
         }
         return res.status(200).json({
             username: username,
             userId: insertUser.rows[0].id,
             loggedIn: true,
             userImg: '',
+            learningLanguages: learningLanguages,
+            nativeLanguage: nativeLanguage
         })
     }
 })

@@ -64,6 +64,8 @@ app.use(express.json())
 
 app.use('/auth', require('./routes/auth'))
 
+app.use('/userInfo', require('./routes/userInfo'))
+
 app.use('/friends', require('./routes/friends'))
 
 server.listen(3000, () => console.log('server listening'))
