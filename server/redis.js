@@ -5,7 +5,7 @@ const redisClient = new Redis();
 
 const userOnline = async (userId) => {
     console.log(userId);
-    const checkOnline = await redisClient.exists(`${userId}`)
+    const checkOnline = await redisClient.exists(`"${userId}`)
     console.log(checkOnline);
     if(checkOnline) {
         console.log('inside checkonline')

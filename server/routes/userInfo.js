@@ -48,7 +48,6 @@ router.get('/allUsers/', async (req, res) => {
     }, [])
     for(let i = 0; i <= reduceUsers.length - 1; i++) {
         const userOnlineStatus = await userOnline(reduceUsers[i].userId)
-
         reduceUsers[i].onlineStatus = userOnlineStatus
     }
     return res.status(200).json(reduceUsers)
@@ -73,7 +72,7 @@ router.get('/allConvos/:id', async (req, res) => {
     
     const allUserConvos = conversations.rows.map(convo => {
         return {
-            convoId: convo.id,
+            conversationId: convo.id,
             userId: convo.user_id
         }
     })

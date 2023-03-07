@@ -47,8 +47,8 @@ io.on('connect', async socket => {
     })
 
     socket.on('private_chat', async (data) => {
-        console.log('check')
         const userSocket = await redisClient.get(data.to)
+        console.log(data + 'heeelllo in socket private_chat');
         if(userSocket) {
            io.to(userSocket).emit('chat_message', data.message)
         }

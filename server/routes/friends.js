@@ -81,7 +81,7 @@ router.get('/latestMessage/:id', async(req, res) => {
 
 router.post('/addConvo/:id1/:id2', async (req, res) => {
     console.log('testtest')
-    console.log(req.params)
+    const currentUserId = req.session.user.userId
     const { id1:userOne, id2:userTwo } = req.params
 
     const checkForExisting = await pool.query(`
@@ -91,21 +91,25 @@ router.post('/addConvo/:id1/:id2', async (req, res) => {
     userid2 = $1 AND userid1 = $2 
     `, [userOne, userTwo])
     if(checkForExisting.rowCount !== 0) {
-        return res.json(404).json({ status: 'conversation already exists'})
+        return res.status(404).json({ status: 'conversation already exists'})
     }
     const addConvo = await pool.query(`
         INSERT INTO conversation(userid1, userid2)
         VALUES($1, $2)
         RETURNING *
     `, [userOne, userTwo])
+    
+    const { id: conversationId, userid1, userid2 } = addConvo.rows[0]
 
-    console.log('test' + addConvo.rows)
+    const adjustConvoShema = {
+        userId: userid1 === currentUserId ? userid2 : userid1,
+        conversationId, 
+    } 
 
-    return res.status(200).json(addConvo.rows[0])
+    return res.status(200).json(adjustConvoShema)
 })
 
 router.post('/newMessage/', async (req, res) => {
-    console.log(req.body);
     const {
         sender,
         time,
@@ -117,5 +121,29 @@ router.post('/newMessage/', async (req, res) => {
     const insertMessage = await pool.query('INSERT INTO message(conversation, sender, content, time) VALUES($1, $2, $3, $4)', [conversationId, sender, content, time])
     return res.status(200);
 })  
+
+router.get('/getAllMessages/:id', async (req, res) => {
+    const { id: convoId } = req.params
+
+    const messages = await pool.query(`
+    SELECT * FROM message WHERE
+    conversation = $1
+    `, [convoId])
+
+    if (messages.rowCount === 0) {
+        return res.status(200).json([])
+    }
+
+    const adjustMessagesSchema = messages.rows.map(message => {
+        return {
+            content: message.content,
+            timestamp: message.time,
+            userId: message.sender
+        }
+    })
+
+    return res.status(200).json(adjustMessagesSchema)
+
+})
 
 module.exports = router
