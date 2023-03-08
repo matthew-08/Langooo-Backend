@@ -80,9 +80,10 @@ router.get('/latestMessage/:id', async(req, res) => {
 })
 
 router.post('/addConvo/:id1/:id2', async (req, res) => {
-    console.log('testtest')
     const currentUserId = req.session.user.userId
     const { id1:userOne, id2:userTwo } = req.params
+    console.log(currentUserId)
+    console.log(userOne)
 
     const checkForExisting = await pool.query(`
     SELECT * FROM conversation
@@ -124,6 +125,10 @@ router.post('/newMessage/', async (req, res) => {
 
 router.get('/getAllMessages/:id', async (req, res) => {
     const { id: convoId } = req.params
+    
+    if(!convoId) {
+        return res.status(404).end()
+    }
 
     const messages = await pool.query(`
     SELECT * FROM message WHERE

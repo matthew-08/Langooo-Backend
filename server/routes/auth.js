@@ -18,7 +18,6 @@ router.route('/signIn').get(async (req, res) => {
     }
 }).post(rateLimiter,async (req, res) => {
     const { username, password } = req.body
-    console.log(req.body)
 
 
     const checkForUser = await pool.query(`
@@ -31,6 +30,7 @@ router.route('/signIn').get(async (req, res) => {
 
     const verifyPass = await bcrypt.compare(password, checkForUser.rows[0].passhash)
 
+    
     if(verifyPass) {
         req.session.user = {
             username: username,
@@ -39,6 +39,10 @@ router.route('/signIn').get(async (req, res) => {
             userImg: '',
             onlineStatus: false
         }
+        const time = new Date().getTime()
+        await pool.query(`
+        INSERT INTO user_login_time(user_id, time) 
+        VALUES($1, $2)`, [checkForUser.rows[0].id, time])
         return res.status(200).json({
             loggedIn: true, 
             username, 
@@ -61,7 +65,6 @@ router.post('/register', async  (req, res) => {
         nativeLanguage,
     } = req.body
 
-    console.log(req.body);
 
     
     const existingUser = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
@@ -97,6 +100,11 @@ router.post('/register', async  (req, res) => {
             userImg: '',
             nativeLanguage: nativeLanguage,
         }
+        const time = new Date().getTime()
+        await pool.query(`
+        INSERT INTO user_login_time(user_id, time) 
+        VALUES($1, $2)`, [insertUser.rows[0].id, time])
+
         return res.status(200).json({
             username: username,
             userId: insertUser.rows[0].id,

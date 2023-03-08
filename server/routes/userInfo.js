@@ -5,20 +5,21 @@ const userOnline = require('../redis').userOnline
 
 router.get('/allUsers/', async (req, res) => {
     const userId = req.session.user.userId
-    console.log(req.session.user.userId)
 
     const queryUsers = (await pool.query(`
     SELECT users.id, username, native_lang, user_img,
-    users.bio, language.name AS user_language
+    users.bio, language.name AS user_language, 
+    user_login_time.time AS login_time
     FROM users
     JOIN
     user_language
     ON users.id = user_language.user_id
     JOIN language
     ON user_language.language_id = language.id
+    JOIN user_login_time
+    ON users.id = user_login_time.user_id
     WHERE users.id != $1
     `, [userId])).rows
-    await console.log(queryUsers)
 
     const languages = {
         1: 'french',
@@ -42,6 +43,7 @@ router.get('/allUsers/', async (req, res) => {
                 learningLanguages: [queryUsers.user_language],
                 onlineStatus: null,
                 bio: queryUsers.bio,
+                lastLogin: queryUsers.login_time,
             })
         }
         return acc

@@ -33,7 +33,6 @@ io.use(authorizeMiddleware);
 app.use(sessionMiddleware)
 
 io.on('connect', async socket => {
-    console.log('in io connect')
     const ok = await redisClient.set(
         `${socket.request.session.user.userId}`, `${socket.id}`, 'EX', 1000,
     )
