@@ -7,11 +7,13 @@ router.post('/sendMessage', async (req, res) => {
     const {timestamp, userId, conversationId, content} = req.body
         // If there's a conversation id that we've already sent to the front end.
         // go ahead and just insert the into the database.
+        console.log(req.body);
         const insertMessage = await pool.query(`
         INSERT INTO message 
         (conversation, sender, content, time) 
         VALUES($1, $2, $3, $4)`, 
         [conversationId, userId, content, timestamp])
+        console.log(insertMessage)
         return res.status(200).json(insertMessage);
 })
 

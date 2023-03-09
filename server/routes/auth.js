@@ -41,8 +41,10 @@ router.route('/signIn').get(async (req, res) => {
         }
         const time = new Date().getTime()
         await pool.query(`
-        INSERT INTO user_login_time(user_id, time) 
-        VALUES($1, $2)`, [checkForUser.rows[0].id, time])
+        UPDATE user_login_time
+        SET time = $1
+        WHERE user_id = $2;
+        `,[time, checkForUser.rows[0].id])
         return res.status(200).json({
             loggedIn: true, 
             username, 
