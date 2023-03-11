@@ -87,13 +87,36 @@ router.get('/allConvos/:id', async (req, res) => {
     if(conversations.rowCount === 0) {
         return res.status(200).json([])
     }
+
+    const fetchedConvos = conversations.rows
     
-    const allUserConvos = conversations.rows.map(convo => {
+    const allUserConvos = await Promise.all(fetchedConvos.map( async (convo) => {
+        console.log(convo.id)
+        const fetchLatestMessage = await pool.query(`
+        SELECT * FROM message 
+        WHERE conversation = $1
+        ORDER BY time 
+        DESC LIMIT 1
+        `, [convo.id])
+        let latestMessage
+        console.log(fetchLatestMessage)
+        if(fetchLatestMessage.rowCount > 0) {
+            const { content, time, sender } = fetchLatestMessage.rows[0]
+            latestMessage = {
+                content: content,
+                timestamp: time,
+                userId: sender,
+            }
+        }
+        else {
+            latestMessage = null
+        } 
         return {
             conversationId: convo.id,
-            userId: convo.user_id
+            userId: convo.user_id,
+            latestMessage: latestMessage,
         }
-    })
+    }))
 
     return res.status(200).json(allUserConvos);
     

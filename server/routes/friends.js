@@ -61,10 +61,20 @@ router.get('/users', async(req, res) => {
     return res.json(allUsers);
 })
 
-router.get('/latestMessage/:id', async(req, res) => {
-    const {id: conversationId} = req.params
-    const mostRecentMessage = await pool.query('SELECT * from message WHERE conversation = $1 ORDER BY time DESC LIMIT 1', [conversationId])
-    return res.json(mostRecentMessage.rows[0])
+router.get('/latestMessage/:convo', async(req, res) => {
+    const { userId } = req.session.user
+    const latestMessage = (`
+    SELECT * FROM message ORDER BY time DESC LIMIT 1
+    `)
+    if(latestMessage.rowCount !== 0) {
+        return {
+            content: latestMessage.content,
+            timestamp: latestMessage.time,
+            userId: latestMessage.sender
+        } 
+    }
+    else {
+    }
 })
 
 router.post('/addConvo/:id1/:id2', async (req, res) => {

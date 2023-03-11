@@ -3,6 +3,7 @@ const formValidation = require('../middleware/formValidation')
 const pool = require('../db')
 const bcrypt = require('bcrypt')
 const rateLimiter = require('../controllers/rateLimiter')
+const { getImg } = require('../utils/S3Handler')
 
 router.route('/signIn').get(async (req, res) => {
     if(req.session.user && req.session.user.username) {
@@ -34,12 +35,12 @@ router.route('/signIn').get(async (req, res) => {
     
     if(verifyPass) {
         const userId = checkForUser.rows[0].id
-        const userImg = (await pool.query(`
+        const fetchUserImg = (await pool.query(`
         SELECT img
         FROM user_img
         WHERE user_id = $1
         `,[userId])).rows[0].img
-        console.log(userImg)
+        const userImg = await getImg(fetchUserImg)
         req.session.user = {
             username: username,
             userId: userId,
