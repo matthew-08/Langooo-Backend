@@ -2,7 +2,7 @@ const pool = require('../db')
 const router = require('express').Router()
 const userOnline = require('../redis').userOnline
 const multer = require('multer')
-const { postImg } = require('../utils/S3Handler')
+const { postImg, getImg } = require('../utils/S3Handler')
 
 
 
@@ -11,7 +11,7 @@ router.get('/allUsers/', async (req, res) => {
     const userId = req.session.user.userId
 
     const queryUsers = (await pool.query(`
-    SELECT users.id, username, native_lang, user_img,
+    SELECT users.id, username, native_lang, user_img.img,
     users.bio, language.name AS user_language, 
     user_login_time.time AS login_time
     FROM users
@@ -22,6 +22,8 @@ router.get('/allUsers/', async (req, res) => {
     ON user_language.language_id = language.id
     JOIN user_login_time
     ON users.id = user_login_time.user_id
+    JOIN user_img
+    ON users.id = user_img.user_id
     WHERE users.id != $1
     `, [userId])).rows
 
@@ -43,7 +45,7 @@ router.get('/allUsers/', async (req, res) => {
                 userId: queryUsers.id,
                 username: queryUsers.username,
                 nativeLanguage: languages[queryUsers.native_lang], 
-                userImg: queryUsers.user_img,
+                userImg: queryUsers.img,
                 learningLanguages: [queryUsers.user_language],
                 onlineStatus: null,
                 bio: queryUsers.bio,
@@ -52,9 +54,19 @@ router.get('/allUsers/', async (req, res) => {
         }
         return acc
     }, [])
+
     for(let i = 0; i <= reduceUsers.length - 1; i++) {
         const userOnlineStatus = await userOnline(reduceUsers[i].userId)
         reduceUsers[i].onlineStatus = userOnlineStatus
+        console.log(reduceUsers[i].userImg)
+        if(reduceUsers[i].userImg !== 'default') {
+            console.log(reduceUsers[i].userImg)
+            await getImg(reduceUsers[i].userImg)
+            .then(res => {
+                reduceUsers[i].userImg = res
+            })
+            .catch(r => reduceUsers[i].userImg = 'default')
+        }
     }
     return res.status(200).json(reduceUsers)
 })
