@@ -19,13 +19,13 @@ const redisClient = require('./redis').redisClient
 const io = new Server(server, {
     cors: {
         credentials: true,
-        origin: 'http://localhost:5173'
+        origin: ['http://localhost:5173', 'http://localhost:5174']
     }
 
 })
 app.use(cors({
     credentials: true,
-    origin: 'http://localhost:5173'
+    origin: ['http://localhost:5173', 'http://localhost:5174']
 }))
 
 io.engine.use(sessionMiddleware);

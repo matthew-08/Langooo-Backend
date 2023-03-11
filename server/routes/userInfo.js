@@ -1,6 +1,10 @@
 const pool = require('../db')
 const router = require('express').Router()
 const userOnline = require('../redis').userOnline
+const multer = require('multer')
+const { postImg } = require('../utils/S3Handler')
+
+
 
 
 router.get('/allUsers/', async (req, res) => {
@@ -81,6 +85,29 @@ router.get('/allConvos/:id', async (req, res) => {
 
     return res.status(200).json(allUserConvos);
     
+})
+
+const storage = multer.memoryStorage()
+
+const upload = multer({ storage })
+
+router.post('/uploadImage', upload.single('image'), async (req, res) => {
+   const { file } = req
+    try {
+        postImg(file)
+        .then(async imgId => { // returns img ID to store in database.
+            const { userId } = req.session.user
+            console.log(imgId)
+            await pool.query(`
+            UPDATE user_img
+            SET img = $2
+            WHERE user_id = $1
+            `,[userId, imgId])
+        }) 
+    } catch (error) {
+        return res.status(404).json({status: 'Server error, please try again later.'})
+    }
+    res.status(200).end()
 })
 
 module.exports = router

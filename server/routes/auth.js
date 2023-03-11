@@ -6,12 +6,13 @@ const rateLimiter = require('../controllers/rateLimiter')
 
 router.route('/signIn').get(async (req, res) => {
     if(req.session.user && req.session.user.username) {
+        console.log('teststestestest')
         return res.status(200)
         .json({ 
             loggedIn: true, 
             username: req.session.user.username, 
             userId: req.session.user.userId,
-            userImg: '' 
+            userImg: req.session.user.userImg
         })
     } else {
         return res.status(404).end()
@@ -32,11 +33,18 @@ router.route('/signIn').get(async (req, res) => {
 
     
     if(verifyPass) {
+        const userId = checkForUser.rows[0].id
+        const userImg = (await pool.query(`
+        SELECT img
+        FROM user_img
+        WHERE user_id = $1
+        `,[userId])).rows[0].img
+        console.log(userImg)
         req.session.user = {
             username: username,
-            userId: checkForUser.rows[0].id,
+            userId: userId,
             loggedIn: true,
-            userImg: '',
+            userImg: userImg,
             onlineStatus: false
         }
         const time = new Date().getTime()
@@ -44,12 +52,12 @@ router.route('/signIn').get(async (req, res) => {
         UPDATE user_login_time
         SET time = $1
         WHERE user_id = $2;
-        `,[time, checkForUser.rows[0].id])
+        `,[time, userId])
         return res.status(200).json({
             loggedIn: true, 
             username, 
-            userId: checkForUser.rows[0].id,
-            userImg: null,
+            userId: userId,
+            userImg: userImg,
         })
     } else {
         res.status(404).json({type: 'password', status: 'Incorrect password'})
@@ -65,6 +73,7 @@ router.post('/register', async  (req, res) => {
         password, 
         languages: learningLanguages,
         nativeLanguage,
+
     } = req.body
 
 
@@ -86,6 +95,12 @@ router.post('/register', async  (req, res) => {
         `, [username, hashedPass, nativeLanguage])
         const userId = insertUser.rows[0].id
 
+        const insertImg = await pool.query(`
+        INSERT INTO user_img (user_id, img)
+        VALUES($1, 'default')
+        `, [userId])
+
+
         for(let i = 0; i <= learningLanguages.length-1; i++) {
             await pool.query(`
                 INSERT INTO user_language(language_id, user_id)
@@ -99,7 +114,7 @@ router.post('/register', async  (req, res) => {
             username: username,
             userId: insertUser.rows[0].id,
             loggedIn: true,
-            userImg: '',
+            userImg: 'default',
             nativeLanguage: nativeLanguage,
         }
         const time = new Date().getTime()
@@ -111,7 +126,7 @@ router.post('/register', async  (req, res) => {
             username: username,
             userId: insertUser.rows[0].id,
             loggedIn: true,
-            userImg: '',
+            userImg: 'default',
             learningLanguages: learningLanguages,
             nativeLanguage: nativeLanguage
         })
