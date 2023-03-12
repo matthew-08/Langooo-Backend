@@ -129,10 +129,10 @@ const upload = multer({ storage })
 router.post('/uploadImage', upload.single('image'), async (req, res) => {
    const { file } = req
     try {
-        postImg(file)
+        await postImg(file)
         .then(async imgId => { // returns img ID to store in database.
             const { userId } = req.session.user
-            console.log(imgId)
+            console.log(imgId + 'should be this id in the database')
             await pool.query(`
             UPDATE user_img
             SET img = $2

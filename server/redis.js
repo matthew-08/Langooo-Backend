@@ -4,12 +4,8 @@ const Redis = require('ioredis');
 const redisClient = new Redis();
 
 const userOnline = async (userId) => {
-    console.log(userId);
     const checkOnline = await redisClient.exists(`${userId}`)
-    console.log(checkOnline);
     if(checkOnline) {
-        console.log('its true')
-        console.log(checkOnline)
         return true
     }
     else {
@@ -17,4 +13,12 @@ const userOnline = async (userId) => {
     }
 }
 
-module.exports = {redisClient, userOnline};
+const logOutUser = async (userid) => {
+    const checkUser = await userOnline(userid)
+
+    if(checkUser) {
+        redisClient.del(`${userid}`)
+    }
+}
+
+module.exports = {redisClient, userOnline, logOutUser};

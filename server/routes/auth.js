@@ -4,6 +4,7 @@ const pool = require('../db')
 const bcrypt = require('bcrypt')
 const rateLimiter = require('../controllers/rateLimiter')
 const { getImg } = require('../utils/S3Handler')
+const { logOutUser } = require('../redis')
 
 router.route('/signIn').get(async (req, res) => {
     if(req.session.user && req.session.user.username) {
@@ -132,6 +133,15 @@ router.post('/register', async  (req, res) => {
             nativeLanguage: nativeLanguage
         })
     }
+})
+
+router.get('/logout', async (req, res) => {
+    const user = req.session.user
+    await logOutUser(user.userId)
+    req.session.destroy()
+    
+    return res.status(200).end()
+
 })
 
 module.exports = router
