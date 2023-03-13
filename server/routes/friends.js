@@ -127,6 +127,7 @@ router.get('/getAllMessages/:id', async (req, res) => {
     const messages = await pool.query(`
     SELECT * FROM message WHERE
     conversation = $1
+    ORDER BY time ASC
     `, [convoId])
 
     if (messages.rowCount === 0) {
@@ -145,4 +146,18 @@ router.get('/getAllMessages/:id', async (req, res) => {
 
 })
 
+router.put('/updateMessage', async (req, res) => {
+    const { userId } = req.session.user
+    console.log(req.body);
+    const { content, timestamp } = req.body
+
+    const updateMessage = await pool.query(`
+        UPDATE message
+        SET content = $1,
+        edited = true
+        WHERE time = $2
+    `, [content, timestamp])
+    
+    return res.status(200).end()
+})
 module.exports = router
