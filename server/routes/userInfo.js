@@ -60,7 +60,6 @@ router.get('/allUsers/', async (req, res) => {
         reduceUsers[i].onlineStatus = userOnlineStatus
         console.log(reduceUsers[i].userImg)
         if(reduceUsers[i].userImg !== 'default') {
-            console.log(reduceUsers[i].userImg)
             await getImg(reduceUsers[i].userImg)
             .then(res => {
                 reduceUsers[i].userImg = res
@@ -143,6 +142,54 @@ router.post('/uploadImage', upload.single('image'), async (req, res) => {
         return res.status(404).json({status: 'Server error, please try again later.'})
     }
     res.status(200).end()
+})
+
+router.put('/updateUser', async (req, res) => {
+    const { userId, updatedInfo } = req.body
+    const {
+        username,
+        languages,
+        nativeLanguage,
+        bio
+    } = updatedInfo
+    console.log(req.session.user);
+
+    const nativeLangId = (await pool.query(`
+    SELECT language.id
+    FROM language
+    WHERE name = $1
+    `,[nativeLanguage])).rows[0].id
+
+    await pool.query(`
+    DELETE FROM user_language
+    WHERE user_id = $1
+    `, [userId])
+
+
+    for(let i = 0; i <= languages.length - 1; i++) {
+        const language = languages[i]
+        await pool.query(`
+        INSERT INTO user_language(language_id, user_id)
+        SELECT language.id, $1
+        FROM language
+        WHERE language.name = $2
+        `,[userId, language])
+    }
+
+    await pool.query(`
+    UPDATE users
+    SET username = $1,
+    bio = $2,
+    native_lang = $3
+    WHERE users.id = $4
+    `, [username, bio, nativeLangId, userId])
+    console.log(username);
+    req.session.user.username = username
+    req.session.user.bio = bio,
+    req.session.user.nativeLanguage = nativeLanguage,
+    req.session.user.learningLanguages = languages
+
+    return res.status(200).end()
 })
 
 module.exports = router

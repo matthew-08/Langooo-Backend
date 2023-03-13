@@ -14,7 +14,10 @@ router.route('/signIn').get(async (req, res) => {
             loggedIn: true, 
             username: req.session.user.username, 
             userId: req.session.user.userId,
-            userImg: req.session.user.userImg
+            userImg: req.session.user.userImg,
+            learningLanguages: req.session.user.learningLanguages,
+            nativeLanguage: req.session.user.nativeLang,
+            bio: req.session.user.bio
         })
     } else {
         return res.status(404).end()
@@ -33,34 +36,58 @@ router.route('/signIn').get(async (req, res) => {
 
     const verifyPass = await bcrypt.compare(password, checkForUser.rows[0].passhash)
 
-    
+    const languages = {
+        1: 'french',
+        2: 'japanese',
+        3: 'vietnamese',
+        4: 'chinese',
+        5: 'english'
+    }
+
     if(verifyPass) {
         const userId = checkForUser.rows[0].id
-        const fetchUserImg = (await pool.query(`
-        SELECT img
-        FROM user_img
-        WHERE user_id = $1
-        `,[userId])).rows[0].img
-        const userImg = await getImg(fetchUserImg)
-        req.session.user = {
+        const fetchUserInfo = (await pool.query(`
+            SELECT users.id, username, native_lang, user_img.img,
+            users.bio, language.name AS user_language
+            FROM users
+            JOIN
+            user_language
+            ON users.id = user_language.user_id
+            JOIN language
+            ON user_language.language_id = language.id
+            JOIN user_img
+            ON users.id = user_img.user_id
+            WHERE users.id = $1
+        `,[userId])).rows
+        const combinedUserLang = fetchUserInfo
+        .reduce((acc, curr) => {
+            return [...acc, curr['user_language']]
+        }, [])
+        const {
+            username,
+            native_lang: nativeLang,
+            img: uImg,
+            bio: userBio,
+        } = fetchUserInfo[0]
+        const userImg = await getImg(uImg)
+        const user = {
             username: username,
             userId: userId,
             loggedIn: true,
             userImg: userImg,
-            onlineStatus: false
+            onlineStatus: false,
+            bio: userBio,
+            learningLanguages: combinedUserLang,
+            nativeLang: languages[nativeLang]
         }
+        req.session.user = user
         const time = new Date().getTime()
         await pool.query(`
         UPDATE user_login_time
         SET time = $1
         WHERE user_id = $2;
         `,[time, userId])
-        return res.status(200).json({
-            loggedIn: true, 
-            username, 
-            userId: userId,
-            userImg: userImg,
-        })
+        return res.status(200).json(user)
     } else {
         res.status(404).json({type: 'password', status: 'Incorrect password'})
     }
@@ -75,7 +102,6 @@ router.post('/register', async  (req, res) => {
         password, 
         languages: learningLanguages,
         nativeLanguage,
-
     } = req.body
 
 
@@ -118,6 +144,8 @@ router.post('/register', async  (req, res) => {
             loggedIn: true,
             userImg: 'default',
             nativeLanguage: nativeLanguage,
+            learningLanguages: learningLanguages,
+            bio: null,
         }
         const time = new Date().getTime()
         await pool.query(`
@@ -130,7 +158,8 @@ router.post('/register', async  (req, res) => {
             loggedIn: true,
             userImg: 'default',
             learningLanguages: learningLanguages,
-            nativeLanguage: nativeLanguage
+            nativeLanguage: nativeLanguage,
+            bio: null
         })
     }
 })
