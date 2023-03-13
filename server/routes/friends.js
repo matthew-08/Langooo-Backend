@@ -137,6 +137,7 @@ router.get('/getAllMessages/:id', async (req, res) => {
         return res.status(200).json([])
     }
 
+    console.log(messages);
     const adjustMessagesSchema = messages.rows.map(message => {
         return {
             content: message.content,
