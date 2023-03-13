@@ -58,7 +58,6 @@ router.get('/allUsers/', async (req, res) => {
     for(let i = 0; i <= reduceUsers.length - 1; i++) {
         const userOnlineStatus = await userOnline(reduceUsers[i].userId)
         reduceUsers[i].onlineStatus = userOnlineStatus
-        console.log(reduceUsers[i].userImg)
         if(reduceUsers[i].userImg !== 'default') {
             await getImg(reduceUsers[i].userImg)
             .then(res => {
@@ -89,8 +88,7 @@ router.get('/allConvos/:id', async (req, res) => {
 
     const fetchedConvos = conversations.rows
     
-    const allUserConvos = await Promise.all(fetchedConvos.map( async (convo) => {
-        console.log(convo.id)
+    const allUserConvos = await Promise.all(fetchedConvos.map(async (convo) => {
         const fetchLatestMessage = await pool.query(`
         SELECT * FROM message 
         WHERE conversation = $1
@@ -98,7 +96,6 @@ router.get('/allConvos/:id', async (req, res) => {
         DESC LIMIT 1
         `, [convo.id])
         let latestMessage
-        console.log(fetchLatestMessage)
         if(fetchLatestMessage.rowCount > 0) {
             const { content, time, sender } = fetchLatestMessage.rows[0]
             latestMessage = {
@@ -131,7 +128,6 @@ router.post('/uploadImage', upload.single('image'), async (req, res) => {
         await postImg(file)
         .then(async imgId => { // returns img ID to store in database.
             const { userId } = req.session.user
-            console.log(imgId + 'should be this id in the database')
             await pool.query(`
             UPDATE user_img
             SET img = $2
@@ -152,7 +148,6 @@ router.put('/updateUser', async (req, res) => {
         nativeLanguage,
         bio
     } = updatedInfo
-    console.log(req.session.user);
 
     const nativeLangId = (await pool.query(`
     SELECT language.id
@@ -183,7 +178,6 @@ router.put('/updateUser', async (req, res) => {
     native_lang = $3
     WHERE users.id = $4
     `, [username, bio, nativeLangId, userId])
-    console.log(username);
     req.session.user.username = username
     req.session.user.bio = bio,
     req.session.user.nativeLanguage = nativeLanguage,

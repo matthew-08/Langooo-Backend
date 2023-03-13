@@ -7,13 +7,11 @@ router.post('/sendMessage', async (req, res) => {
     const {timestamp, userId, conversationId, content} = req.body
         // If there's a conversation id that we've already sent to the front end.
         // go ahead and just insert the into the database.
-        console.log(req.body);
         const insertMessage = await pool.query(`
         INSERT INTO message 
         (conversation, sender, content, time) 
         VALUES($1, $2, $3, $4)`, 
         [conversationId, userId, content, timestamp])
-        console.log(insertMessage)
         return res.status(200).json(insertMessage);
 })
 
@@ -80,8 +78,6 @@ router.get('/latestMessage/:convo', async(req, res) => {
 router.post('/addConvo/:id1/:id2', async (req, res) => {
     const currentUserId = req.session.user.userId
     const { id1:userOne, id2:userTwo } = req.params
-    console.log(currentUserId)
-    console.log(userOne)
 
     const checkForExisting = await pool.query(`
     SELECT * FROM conversation
@@ -137,7 +133,6 @@ router.get('/getAllMessages/:id', async (req, res) => {
         return res.status(200).json([])
     }
 
-    console.log(messages);
     const adjustMessagesSchema = messages.rows.map(message => {
         return {
             content: message.content,

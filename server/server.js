@@ -52,20 +52,16 @@ io.on('connect', async socket => {
             conversationId: data.conversationId
         }
         if(userSocket) {
-            console.log('sent');
            io.to(userSocket).emit('chat_message', response)
         }
     })
     socket.on('edit_message', async (data) => {
         const userSocket = await redisClient.get(data.to)
-        console.log(userSocket)
         const response = {
             message: data.message,
             conversationId: data.conversationId
         }
         if(userSocket) {
-            console.log('emitting now')
-            console.log(response);
             io.to(userSocket).emit('on_edit', response)
         }
     })
