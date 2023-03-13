@@ -56,6 +56,13 @@ io.on('connect', async socket => {
            io.to(userSocket).emit('chat_message', response)
         }
     })
+    socket.on('edit_message', async (data) => {
+        const userSocket = await redisClient.get(data.message.userId)
+        console.log(data);
+        if(userSocket) {
+            io.to(userSocket).edit("edit_message", data)
+        }
+    })
 })
 
 
