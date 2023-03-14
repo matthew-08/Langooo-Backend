@@ -8,8 +8,6 @@ require('dotenv').config()
 const sessionMiddleware = require('./controllers/serverController').sessionMiddleware
 const authorizeMiddleware = require('./controllers/socketcontroller').authorizeUser
 
-const RedisStore = require('connect-redis')(session)
-
 const app = express()
 
 const server = http.createServer(app)
@@ -63,6 +61,17 @@ io.on('connect', async socket => {
         }
         if(userSocket) {
             io.to(userSocket).emit('on_edit', response)
+        }
+    })
+    socket.on('msg_delete', async (data) => {
+        const userSocket = await redisClient.get(data.to)
+        console.log(data)
+        const response = {
+            message: data.message,
+            conversationId: data.conversationId
+        }
+        if(userSocket) {
+            io.to(userSocket).emit('on_delete', response)
         }
     })
 })

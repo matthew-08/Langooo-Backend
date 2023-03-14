@@ -160,4 +160,21 @@ router.put('/updateMessage', async (req, res) => {
     
     return res.status(200).end()
 })
+
+router.delete('/deleteMessage/:convoId/:messageId', async (req, res) => {
+
+    const { convoId, messageId } = req.params
+
+    await pool.query(`
+    DELETE FROM
+    message
+    WHERE
+    conversation = $1
+    AND
+    time = $2
+    `, [convoId, messageId])
+
+    return res.status(200).end()
+})
+
 module.exports = router
