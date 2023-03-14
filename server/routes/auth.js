@@ -35,8 +35,9 @@ router.route('/signIn').get(async (req, res) => {
     if(checkForUser.rowCount === 0) {
         return res.status(404).json({type: 'username', status: 'No user found'})
     }
-
+    console.log(checkForUser)
     const verifyPass = await bcrypt.compare(password, checkForUser.rows[0].passhash)
+    console.log(verifyPass)
 
     const languages = {
         1: 'french',
@@ -61,6 +62,8 @@ router.route('/signIn').get(async (req, res) => {
             ON users.id = user_img.user_id
             WHERE users.id = $1
         `,[userId])).rows
+        console.log(fetchUserInfo)
+
         const combinedUserLang = fetchUserInfo
         .reduce((acc, curr) => {
             return [...acc, curr['user_language']]
