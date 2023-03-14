@@ -1,6 +1,7 @@
 const session = require('express-session')
-const RedisStore = require('connect-redis')(session)
+const RedisStore = require('connect-redis').default
 const redisClient = require('../redis').redisClient
+
 
 
 const sessionMiddleware = session({
