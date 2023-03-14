@@ -2,4 +2,3 @@
 .env.example
 .env.local
 .env.staging
-/utils/S3Handler.js
