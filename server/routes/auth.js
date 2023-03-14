@@ -21,7 +21,7 @@ router.route('/signIn').get(async (req, res) => {
     } else {
         return res.status(404).end()
     }
-}).post(rateLimiter,async (req, res) => {
+}).post(rateLimiter, async (req, res) => {
     const { username, password } = req.body
 
 
