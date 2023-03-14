@@ -17,7 +17,7 @@ const redisClient = require('./redis').redisClient
 const io = new Server(server, {
     cors: {
         credentials: true,
-        origin: ['http://localhost:5173', 'http://localhost:5174']
+        origin: ['http://localhost:5173/', 'http://localhost:5174/']
     }
 
 })
@@ -90,5 +90,5 @@ app.use('/userInfo', require('./routes/userInfo'))
 
 app.use('/convo', require('./routes/friends'))
 
-server.listen(`${process.env.PORT}`, () => console.log('server listening'))
+server.listen(`${process.env.PORT}`)
 
