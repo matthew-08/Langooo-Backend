@@ -19,7 +19,6 @@ router.route('/signIn').get(async (req, res) => {
             bio: req.session.user.bio
         })
     } else {
-        console.log('tests')
         return res.status(404).end()
     }
 }).post(rateLimiter, async (req, res) => {
