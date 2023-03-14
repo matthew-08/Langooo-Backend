@@ -1,7 +1,13 @@
 //@ts-nocheck
 const Redis = require('ioredis');
 
-const redisClient = new Redis();
+const redisClient = new Redis({
+    port: process.env.REDIS_URL, // Redis port
+    host: process.env.REDISHOST, // Redis host
+    username: process.env.REDISUSER, // needs Redis >= 6
+    password: process.env.REDISPASSWORD,
+    db: 0, // Defaults to 0
+  });
 
 const userOnline = async (userId) => {
     const checkOnline = await redisClient.exists(`${userId}`)
