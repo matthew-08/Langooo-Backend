@@ -90,5 +90,5 @@ app.use('/userInfo', require('./routes/userInfo'))
 
 app.use('/convo', require('./routes/friends'))
 
-server.listen(`${PORT}`, () => console.log('server listening'))
+server.listen(`${process.env.PORT}`, () => console.log('server listening'))
 
