@@ -10,7 +10,7 @@ const sessionMiddleware = session({
         maxAge: 1000 * 60 * 60 * 24,
         httpOnly: true,
         sameSite: 'lax',
-        secure: false,
+        secure: true,
     },
     credentials: true,
     name: 'sid',
