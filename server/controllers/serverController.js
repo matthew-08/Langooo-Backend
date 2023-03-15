@@ -9,7 +9,8 @@ const sessionMiddleware = session({
     cookie: {
         maxAge: 1000 * 60 * 60 * 24,
         httpOnly: true,
-        sameSite: 'lax'
+        sameSite: 'lax',
+        secure:true,
     },
     credentials: true,
     name: 'sid',
