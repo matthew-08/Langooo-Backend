@@ -26,10 +26,7 @@ app.set('trust proxy', 1);
 app.use(cors({
     credentials: true,
     origin: process.env.FRONTEND_URL,
-    exposedHeaders: ["set-cookie"],
-    headers: {
-        "withCredentials" : true
-        }
+    exposedHeaders: ["set-cookie"]
 }))
 
 io.engine.use(sessionMiddleware);
