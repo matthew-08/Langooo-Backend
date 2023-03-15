@@ -11,6 +11,7 @@ const sessionMiddleware = session({
         httpOnly: true,
         sameSite: 'none',
         secure: true,
+        path:['/', '/convo', '/auth']
     },
     credentials: true,
     name: 'sid',
