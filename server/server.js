@@ -26,6 +26,7 @@ app.use(cors({
     origin: process.env.FRONTEND_URL,
     exposedHeaders: ["set-cookie"]
 }))
+app.enable('trust proxy');
 
 io.engine.use(sessionMiddleware);
 io.use(authorizeMiddleware);
