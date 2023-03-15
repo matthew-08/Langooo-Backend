@@ -21,7 +21,7 @@ const io = new Server(server, {
     }
 
 })
-app.enable('trust proxy');
+app.set('trust proxy', 1);
 
 app.use(cors({
     credentials: true,
