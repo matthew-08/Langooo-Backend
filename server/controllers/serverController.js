@@ -3,7 +3,7 @@ const RedisStore = require('connect-redis').default
 const redisClient = require('../redis').redisClient
 
 
-
+const ok = 'true'
 const sessionMiddleware = session({
     secret: process.env.SESSION_SECRET,
     cookie: {
