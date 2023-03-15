@@ -1,6 +1,7 @@
 //@ts-nocheck
 const Redis = require('ioredis');
 
+const test = "test"
 const redisClient = new Redis({
     port: process.env.REDISPORT, // Redis port
     host: process.env.REDISHOST, // Redis host
