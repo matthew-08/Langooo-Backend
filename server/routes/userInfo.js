@@ -8,6 +8,7 @@ const { postImg, getImg } = require('../utils/S3Handler')
 
 
 router.get('/allUsers/', async (req, res) => {
+    console.log(req.session)
     const userId = req.session.user.userId
 
     const queryUsers = (await pool.query(`
@@ -185,6 +186,7 @@ router.put('/updateUser', async (req, res) => {
 
     return res.status(200).end()
 })
+
 
 
 module.exports = router
