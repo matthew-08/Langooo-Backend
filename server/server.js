@@ -21,12 +21,13 @@ const io = new Server(server, {
     }
 
 })
+app.enable('trust proxy');
+
 app.use(cors({
     credentials: true,
     origin: process.env.FRONTEND_URL,
     exposedHeaders: ["set-cookie"]
 }))
-app.enable('trust proxy');
 
 io.engine.use(sessionMiddleware);
 io.use(authorizeMiddleware);
