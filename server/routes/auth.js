@@ -24,7 +24,6 @@ router.route('/signIn').get(async (req, res) => {
     }
 }).post(rateLimiter, async (req, res) => {
     const { username, password } = req.body
-    console.log('tests')
 
 
 
@@ -35,9 +34,7 @@ router.route('/signIn').get(async (req, res) => {
     if(checkForUser.rowCount === 0) {
         return res.status(404).json({type: 'username', status: 'No user found'})
     }
-    console.log(checkForUser)
     const verifyPass = await bcrypt.compare(password, checkForUser.rows[0].passhash)
-    console.log(verifyPass)
 
     const languages = {
         1: 'french',
@@ -86,6 +83,8 @@ router.route('/signIn').get(async (req, res) => {
             nativeLang: languages[nativeLang]
         }
         req.session.user = user
+        console.log(req.session.user)
+        console.log(req.sessionID)
         const time = new Date().getTime()
         await pool.query(`
         UPDATE user_login_time
