@@ -8,6 +8,7 @@ const { logOutUser } = require('../redis')
 
 router.route('/signIn').get(async (req, res) => {
     if(req.session.user && req.session.user.username) {
+        req.session.save()
         return res.status(200)
         .json({ 
             loggedIn: true, 
