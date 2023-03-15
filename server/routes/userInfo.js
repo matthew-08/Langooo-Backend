@@ -9,6 +9,7 @@ const { postImg, getImg } = require('../utils/S3Handler')
 
 router.get('/allUsers/', async (req, res) => {
     console.log(req.sessionID)
+    console.log(req.session.user);
     const userId = req.session.user.userId
 
     const queryUsers = (await pool.query(`
