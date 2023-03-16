@@ -17,7 +17,7 @@ const redisClient = require('./redis').redisClient
 const io = new Server(server, {
     cors: {
         credentials: true,
-        origin: process.env.FRONTEND_URL
+        origin: [process.env.FRONTEND_URL, 'http://localhost:5173/']
     }
 
 })
@@ -25,7 +25,7 @@ app.set('trust proxy', 1);
 
 app.use(cors({
     credentials: true,
-    origin: process.env.FRONTEND_URL,
+    origin: [process.env.FRONTEND_URL, 'http://localhost:5173/'],
     exposedHeaders: ["set-cookie"]
 }))
 
