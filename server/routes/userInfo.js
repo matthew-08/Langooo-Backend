@@ -135,6 +135,7 @@ router.post('/uploadImage', upload.single('image'), async (req, res) => {
             SET img = $2
             WHERE user_id = $1
             `,[userId, imgId])
+            req.session.user.userImg = imgId
         }) 
     } catch (error) {
         return res.status(404).json({status: 'Server error, please try again later.'})
