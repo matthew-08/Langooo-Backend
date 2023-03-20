@@ -12,12 +12,7 @@ router.route('/signIn').get(async (req, res) => {
         return res.status(200)
         .json({ 
             loggedIn: true, 
-            username: req.session.user.username, 
-            userId: req.session.user.userId,
-            userImg: req.session.user.userImg,
-            learningLanguages: req.session.user.learningLanguages,
-            nativeLanguage: req.session.user.nativeLang,
-            bio: req.session.user.bio
+            ...req.session.user
         })
     } else {
         return res.status(404).end()
@@ -82,8 +77,7 @@ router.route('/signIn').get(async (req, res) => {
             learningLanguages: combinedUserLang,
             nativeLang: languages[nativeLang]
         }
-        req.session.user = user
-        console.log(req.session.user)
+        console.log('initial session id')
         console.log(req.sessionID)
         const time = new Date().getTime()
         await pool.query(`

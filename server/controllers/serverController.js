@@ -7,14 +7,14 @@ const ok = 'true'
 const sessionMiddleware = session({
     secret: process.env.SESSION_SECRET,
     cookie: {
-        maxAge: 1000 * 60 * 60 * 24,
+        maxAge: 1000 * 60 * 60,
         httpOnly: true,
         sameSite: 'none',
         secure: true,
     },
     credentials: true,
     name: 'sid',
-    store: new RedisStore({ client: redisClient }),
+    store: new RedisStore({ client: redisClient } ),
     resave: false,
     saveUninitialized: false,
 })

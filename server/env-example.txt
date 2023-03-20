@@ -1,0 +1,27 @@
+This is an example file for the env variables needed to run this project, feel free to copy and paste them into your
+.env file and change the values as needed.
+
+//POSTGRES
+PGDATABASE='database'
+PGHOST='host'
+PGUSER='username'
+PGPASSWORD='password'
+PGPORT='port'
+
+
+//SESSION
+SESSION_SECRET='secret key for sessions'
+
+
+//REDIS
+REDISHOST='host'
+REDISPASSWORD='password'
+REDISPORT='port'
+REDISUSER='user'
+
+
+//AWS
+BUCKET_NAME='bucket name'
+BUCKET_LOCATION='bucket location'
+ACCESS_KEY='access key'
+SECRET_ACCESS_KEY='secret access key'

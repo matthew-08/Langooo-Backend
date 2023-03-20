@@ -3,7 +3,6 @@ const cors = require('cors')
 const { Server } = require('socket.io')
 const helmet = require('helmet')
 const http = require('http')
-const session = require('express-session')
 require('dotenv').config()
 const sessionMiddleware = require('./controllers/serverController').sessionMiddleware
 const authorizeMiddleware = require('./controllers/socketcontroller').authorizeUser
@@ -34,12 +33,12 @@ io.use(authorizeMiddleware);
 app.use(sessionMiddleware)
 
 io.on('connect', async socket => {
-    const ok = await redisClient.set(
+    await redisClient.set(
         `${socket.request.session.user.userId}`, `${socket.id}`, 'EX', 1000,
     )
-    const hello = await redisClient.ttl(`${socket.request.session.user.id}`).then(res => console.log(res))
+    await redisClient.ttl(`${socket.request.session.user.id}`).then(res => console.log(res))
     
-    const check = await redisClient.exists(`${socket.request.user}`)
+    const checkIfExists = await redisClient.exists(`${socket.request.user}`)
     
     socket.on('disconnect', async () => {
         const userId = socket.request.session.user.id
@@ -78,10 +77,6 @@ io.on('connect', async socket => {
         }
     })
 })
-
-
-
-
 
 app.use(helmet())
 
