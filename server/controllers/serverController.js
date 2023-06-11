@@ -9,14 +9,14 @@ const sessionMiddleware = session({
     cookie: {
         maxAge: 1000 * 60 * 60,
         httpOnly: true,
-        sameSite: 'none',
+        sameSite: 'lax',
         secure: true,
     },
     credentials: true,
     name: 'sid',
     store: new RedisStore({ client: redisClient } ),
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true,
 })
 
 module.exports = { sessionMiddleware }

@@ -15,12 +15,10 @@ router.route('/signIn').get(async (req, res) => {
             ...req.session.user
         })
     } else {
-        return res.status(404).end()
+        return res.status(404).send('')
     }
-}).post(rateLimiter, async (req, res) => {
+}).post(async (req, res) => {
     const { username, password } = req.body
-
-
 
     const checkForUser = await pool.query(`
         SELECT id, passhash FROM users WHERE username=$1
@@ -54,7 +52,6 @@ router.route('/signIn').get(async (req, res) => {
             ON users.id = user_img.user_id
             WHERE users.id = $1
         `,[userId])).rows
-        console.log(fetchUserInfo)
 
         const combinedUserLang = fetchUserInfo
         .reduce((acc, curr) => {
@@ -67,6 +64,7 @@ router.route('/signIn').get(async (req, res) => {
             bio: userBio,
         } = fetchUserInfo[0]
         const userImg = await getImg(uImg)
+        console.log(userId)
         const user = {
             username: username,
             userId: userId,
@@ -77,6 +75,7 @@ router.route('/signIn').get(async (req, res) => {
             learningLanguages: combinedUserLang,
             nativeLang: languages[nativeLang]
         }
+        req.session.user = user
         console.log('initial session id')
         console.log(req.sessionID)
         const time = new Date().getTime()
@@ -85,6 +84,7 @@ router.route('/signIn').get(async (req, res) => {
         SET time = $1
         WHERE user_id = $2;
         `,[time, userId])
+
         return res.status(200).json(user)
     } else {
         res.status(404).json({type: 'password', status: 'Incorrect password'})
